@@ -31,8 +31,8 @@ data "archive_file" "lambda-layer-source" {
 data "aws_iam_policy_document" "function-policy" {
 
   statement {
-    sid    = "SSMParameterStoreAccess"
-    effect = "Allow"
+    sid     = "SSMParameterStoreAccess"
+    effect  = "Allow"
     actions = [
       "ssm:GetParametersByPath",
     ]
@@ -41,7 +41,7 @@ data "aws_iam_policy_document" "function-policy" {
     ]
   }
 
-  statement {
+  /*statement {
     sid    = "DynamoDBTableAccess"
     effect = "Allow"
     actions = [
@@ -55,11 +55,24 @@ data "aws_iam_policy_document" "function-policy" {
     resources = [
       for table in var.dynamodb_table_list : "arn:aws:dynamodb:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:table/${module.dynamodb-table-name[table.name].name}"
     ]
+  }*/
+
+  statement {
+    sid     = "AllowLambdaEditItself"
+    effect  = "Allow"
+    actions = [
+      "lambda:*",
+      "iam:PassRole"
+    ]
+    resources = [
+      "arn:aws:iam::286189538278:role/lambda_basic_execution",
+      "arn:aws:lambda:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:function:haaska"
+    ]
   }
 
   statement {
-    sid    = "KMSKeyAccess"
-    effect = "Allow"
+    sid     = "KMSKeyAccess"
+    effect  = "Allow"
     actions = [
       "kms:Decrypt*",
       "kms:Encrypt*",
@@ -71,8 +84,8 @@ data "aws_iam_policy_document" "function-policy" {
   }
 
   statement {
-    sid    = "CloudWatchLogGroupAccess"
-    effect = "Allow"
+    sid     = "CloudWatchLogGroupAccess"
+    effect  = "Allow"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",

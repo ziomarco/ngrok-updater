@@ -2,7 +2,7 @@ import { GetParametersByPathCommand, Parameter, SSMClient } from "@aws-sdk/clien
 
 const SSM_PREFIX = `/service/${process.env.SERVICE_DOMAIN}/${process.env.SERVICE_NAME}/${process.env.SERVICE_ENVIRONMENT}/`;
 const SSM_CLIENT = new SSMClient({
-    region: process.env.AWS_REGION || 'ap-southeast-1'
+    region: process.env.AWS_REGION || 'eu-west-1'
 });
 
 /**

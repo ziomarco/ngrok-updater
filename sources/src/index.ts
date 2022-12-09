@@ -1,6 +1,4 @@
-import { inspect } from "util";
-import { populateEnvironmentVariables } from "./helpers/parameter-store.helper";
-import { DynamoDBLibrary } from "./libraries/dynamodb.library";
+import {populateEnvironmentVariables} from "./helpers/parameter-store.helper";
 
 export interface LambdaFunctionInterface {
     handler: (event: any, context: any, callback: any) => Promise<any>;
@@ -30,8 +28,7 @@ async function startLambda(event: any, context: any, callback: any) {
     // --------------------------------------------------
     // load the library instances here
     // --------------------------------------------------
-    await DynamoDBLibrary.instance();
-    // await DatadogLibrary.instance(); <-- un comment this line to enable datadog library
+    //await DynamoDBLibrary.instance();
 
     // generate class name based on function name
     let className = functionName.split(`-`).map((x: string) => x.charAt(0).toUpperCase() + x.slice(1)).join(``) + 'Function';
@@ -59,29 +56,10 @@ async function startLambda(event: any, context: any, callback: any) {
         console.info(`lambda function left time: ${context.getRemainingTimeInMillis()} ms`);
         console.info(`---------------------------------------------`);
 
-        // un comment this line to send the metric to datadog
-        // let datadogTags = [
-        //     `name:${functionName}`,
-        //     `status:${errorResponse ? 'failure' : 'success'}`
-        // ];
-
-        // // stream the metric to datadog
-        // DatadogLibrary.queueMetric(`lambda.execution-count`, 1, "count", datadogTags);
-        // DatadogLibrary.queueMetric(`lambda.execution-duration`, new Date().getTime() - start, "gauge", datadogTags);
-        // DatadogLibrary.queueMetric(`lambda.execution-left-time`, context.getRemainingTimeInMillis(), "gauge", datadogTags);
-
         if (!errorResponse) return;
 
         // log the errror message to cloudwatch logs
         console.error(`Lambda ${functionName} execution error`, errorResponse);
-
-        // un comment this line to send the metric to datadog
-        // // stream the error to datadog event
-        // DatadogLibrary.queueEvent(`Lambda ${functionName} execution error`, [
-        //     `Function Name: ${functionName}`,
-        //     `Error: ${errorResponse}`,
-        //     `Error Details: ${inspect(errorResponse)}`
-        // ].join(`\n`), `error`, datadogTags);
 
         // throw the original error
         callback(null, {
