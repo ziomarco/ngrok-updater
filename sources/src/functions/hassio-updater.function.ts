@@ -1,10 +1,10 @@
-import {LambdaFunction} from "..";
-import {NgrokClient} from "../libraries/ngrok.library";
 import {
     GetFunctionConfigurationCommand,
     LambdaClient,
     UpdateFunctionConfigurationCommand
 } from "@aws-sdk/client-lambda";
+import { LambdaFunction } from "..";
+import { NgrokClient } from "../libraries/ngrok.library";
 
 export class HassioUpdaterFunction extends LambdaFunction {
     public async handler(event: any, context: any, callback: any) {
@@ -14,11 +14,12 @@ export class HassioUpdaterFunction extends LambdaFunction {
         const tunnels = await ngrok.getTunnels();
         const hassioTunnel = tunnels.find(t => t.forwards_to.includes(':8123'));
         if (!hassioTunnel) throw new Error('No Hass.io tunnel found!');
-        const newUrl = hassioTunnel.public_url;
+        // : Are for a bug in haaska with .a ending domain (like ngrok .app) https://github.com/auchter/haaska/issues/120
+        const newUrl = `${hassioTunnel.public_url}:`;
         console.log('[ngrokUpdater] Configuring Lambda Client');
-        const lambdaClient = new LambdaClient({region: process.env.AWS_REGION ?? 'eu-west-1'});
+        const lambdaClient = new LambdaClient({ region: process.env.AWS_REGION ?? 'eu-west-1' });
         console.log('[ngrokUpdater] Getting lambda configuration');
-        const existingConfig = await lambdaClient.send(new GetFunctionConfigurationCommand({FunctionName: TARGET_FUNCTION_NAME}));
+        const existingConfig = await lambdaClient.send(new GetFunctionConfigurationCommand({ FunctionName: TARGET_FUNCTION_NAME }));
         console.log('[ngrokUpdater] Updating lambda configuration');
         await lambdaClient.send(new UpdateFunctionConfigurationCommand({
             FunctionName: TARGET_FUNCTION_NAME,
